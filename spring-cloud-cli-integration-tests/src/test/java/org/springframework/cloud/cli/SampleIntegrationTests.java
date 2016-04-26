@@ -76,4 +76,9 @@ public class SampleIntegrationTests {
 				output.contains("[/routes || /routes.json],methods=[GET]"));
 	}
 
+	@Test
+	public void devtools() throws Exception {
+		this.cli.devtools();
+	}
+
 }

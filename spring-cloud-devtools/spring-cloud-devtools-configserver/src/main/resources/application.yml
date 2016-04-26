@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: configserver
+  profiles:
+    active: native
+  cloud:
+    config:
+      server:
+        native:
+          search-locations: classpath:/devtools, file:./devtools
+
+server:
+  port: 8888
+management:
+  context-path: /admin

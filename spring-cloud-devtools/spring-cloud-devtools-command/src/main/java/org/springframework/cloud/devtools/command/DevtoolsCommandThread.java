@@ -19,8 +19,8 @@ package org.springframework.cloud.devtools.command;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +44,7 @@ public class DevtoolsCommandThread extends Thread {
 
 	private static final Logger logger = LoggerFactory.getLogger(DevtoolsCommandThread.class);
 
-	private Map<String, DeploymentState> deployed = new LinkedHashMap<>();
+	private Map<String, DeploymentState> deployed = new ConcurrentHashMap<>();
 
 	private String[] args;
 
@@ -89,16 +89,21 @@ public class DevtoolsCommandThread extends Thread {
 		logger.info("\n\nType Ctrl-C to quit.\n");
 
 		while (true) {
-		/*for (Map.Entry<String, DeploymentState> entry : this.deployed.entrySet()) {
-			String id = entry.getKey();
-			DeploymentState state = entry.getValue();
-			AppStatus status = deployer.status(id);
-			DeploymentState newState = status.getState();
-			if (state != newState) {
-				logger.info("{} change status from {} to {}", id, state, newState);
-				this.deployed.put(id, newState);
+			for (Map.Entry<String, DeploymentState> entry : this.deployed.entrySet()) {
+				String id = entry.getKey();
+				DeploymentState state = entry.getValue();
+				AppStatus status = deployer.status(id);
+				DeploymentState newState = status.getState();
+				if (state != newState) {
+					logger.info("{} change status from {} to {}", id, state, newState);
+					this.deployed.put(id, newState);
+				}
 			}
-		}*/
+			try {
+				Thread.sleep(properties.getStatusSleepMillis());
+			} catch (InterruptedException e) {
+				logger.error("error sleeping", e);
+			}
 		}
 	}
 
@@ -111,15 +116,12 @@ public class DevtoolsCommandThread extends Thread {
 		AppDeploymentRequest request = new AppDeploymentRequest(definition, resource, environmentProperties);
 
 		String id = deployer.deploy(request);
-		AppStatus status = deployer.status(id);
-		logger.info("Status of {}: {}", id, status);
-		this.deployed.put(id, status.getState());
+		AppStatus appStatus = getAppStatus(deployer, id);
+		logger.info("Status of {}: {}", id, appStatus);
 		//TODO: stream stdout/stderr like docker-compose (with colors and prefix)
 
 		if (deployable.isWaitUntilStarted()) {
 			try {
-				AppStatus appStatus = getAppStatus(deployer, id);
-
 				String description = deployable.getName() != null ? deployable.getName() : resource.getArtifactId();
 				logger.info("\n\nWaiting for {} to start.\n", description);
 

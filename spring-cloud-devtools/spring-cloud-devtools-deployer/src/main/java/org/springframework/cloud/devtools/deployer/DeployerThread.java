@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.devtools.command;
+package org.springframework.cloud.devtools.deployer;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,7 +32,7 @@ import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
-import org.springframework.cloud.devtools.command.DevtoolsProperties.Deployable;
+import org.springframework.cloud.devtools.deployer.DeployerProperties.Deployable;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.OrderComparator;
 import org.springframework.util.StringUtils;
@@ -41,15 +41,15 @@ import org.springframework.util.StringUtils;
  * @author Spencer Gibb
  */
 @SuppressWarnings("unused")
-public class DevtoolsCommandThread extends Thread {
+public class DeployerThread extends Thread {
 
-	private static final Logger logger = LoggerFactory.getLogger(DevtoolsCommandThread.class);
+	private static final Logger logger = LoggerFactory.getLogger(DeployerThread.class);
 
 	private Map<String, DeploymentState> deployed = new ConcurrentHashMap<>();
 
 	private String[] args;
 
-	public DevtoolsCommandThread(ClassLoader classLoader, String[] args) {
+	public DeployerThread(ClassLoader classLoader, String[] args) {
 		super("spring-cloud-devtools");
 		this.args = args;
 		setContextClassLoader(classLoader);
@@ -58,14 +58,14 @@ public class DevtoolsCommandThread extends Thread {
 
 	@Override
 	public void run() {
-		final ConfigurableApplicationContext context = new SpringApplicationBuilder(PropertyPlaceholderAutoConfiguration.class, DevtoolsCommandConfiguration.class)
+		final ConfigurableApplicationContext context = new SpringApplicationBuilder(PropertyPlaceholderAutoConfiguration.class, DeployerConfiguration.class)
 				.web(false)
 				.properties("spring.config.name=cloud", "banner.location=devtools-banner.txt")
 				.run(args);
 
 		final AppDeployer deployer = context.getBean(AppDeployer.class);
 
-		DevtoolsProperties properties = context.getBean(DevtoolsProperties.class);
+		DeployerProperties properties = context.getBean(DeployerProperties.class);
 
 		ArrayList<Deployable> deployables = new ArrayList<>(properties.getDeployables());
 		OrderComparator.sort(deployables);
@@ -80,7 +80,7 @@ public class DevtoolsCommandThread extends Thread {
 			@Override
 			public void run() {
 				logger.info("\n\nShutting down ...\n");
-				for (String id : DevtoolsCommandThread.this.deployed.keySet()) {
+				for (String id : DeployerThread.this.deployed.keySet()) {
 					logger.info("Undeploying {}", id);
 					deployer.undeploy(id);
 				}
@@ -109,7 +109,7 @@ public class DevtoolsCommandThread extends Thread {
 		}
 	}
 
-	private String deploy(AppDeployer deployer, Deployable deployable, DevtoolsProperties properties) {
+	private String deploy(AppDeployer deployer, Deployable deployable, DeployerProperties properties) {
 		if (StringUtils.hasText(deployable.getName())
 				&& !properties.getDeploy().contains(deployable.getName())) {
 			// this deployable isn't in the list of things to deploy

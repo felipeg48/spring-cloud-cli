@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.devtools.command;
+package org.springframework.cloud.devtools.deployer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +26,7 @@ import org.springframework.core.Ordered;
  * @author Spencer Gibb
  */
 @ConfigurationProperties(prefix = "devtools")
-public class DevtoolsProperties {
+public class DeployerProperties {
 
 	private List<Deployable> deployables = new ArrayList<>();
 
@@ -60,7 +60,7 @@ public class DevtoolsProperties {
 
 	@Override
 	public String toString() {
-		final StringBuffer sb = new StringBuffer("DevtoolsProperties{");
+		final StringBuffer sb = new StringBuffer("DeployerProperties{");
 		sb.append("deployables=").append(deployables);
 		sb.append("deploy=").append(deploy);
 		sb.append("statusSleepMillis=").append(statusSleepMillis);

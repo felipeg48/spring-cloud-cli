@@ -55,7 +55,7 @@ public class DevtoolsCommand extends AbstractCommand {
 		try {
 			URLClassLoader classLoader = populateClassloader();
 
-			String name = "org.springframework.cloud.devtools.command.DevtoolsCommandThread";
+			String name = "org.springframework.cloud.devtools.deployer.DeployerThread";
 			Class<?> threadClass = classLoader.loadClass(name);
 
 			Constructor<?> constructor = threadClass.getConstructor(ClassLoader.class, String[].class);
@@ -95,7 +95,7 @@ public class DevtoolsCommand extends AbstractCommand {
 		//TODO: get version dynamically?
 		HashMap<String, String> dependency = new HashMap<>();
 		dependency.put("group", "org.springframework.cloud.devtools");
-		dependency.put("module", "spring-cloud-devtools-command");
+		dependency.put("module", "spring-cloud-devtools-deployer");
 		dependency.put("version", "1.1.0.BUILD-SNAPSHOT");
 		URI[] uris = grapeEngine.resolve(null, dependency);
 		//System.out.println("resolved URI's " + Arrays.asList(uris));

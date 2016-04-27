@@ -4,12 +4,12 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.springframework.cloud.devtools</groupId>
-	<artifactId>spring-cloud-devtools-command</artifactId>
+	<artifactId>spring-cloud-devtools-deployer</artifactId>
 	<version>1.1.0.BUILD-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
-	<name>spring-cloud-devtools-command</name>
-	<description>Spring Cloud Devtools Command</description>
+	<name>spring-cloud-devtools-deployer</name>
+	<description>Spring Cloud Devtools Deployer</description>
 
 	<parent>
 		<groupId>org.springframework.cloud</groupId>

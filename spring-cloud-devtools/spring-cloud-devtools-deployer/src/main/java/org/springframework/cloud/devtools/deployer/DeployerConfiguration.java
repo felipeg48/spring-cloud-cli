@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.devtools.command;
+package org.springframework.cloud.devtools.deployer;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -29,11 +29,11 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @EnableConfigurationProperties
-public class DevtoolsCommandConfiguration {
+public class DeployerConfiguration {
 
 	@Bean
-	public DevtoolsProperties devtoolsProperties() {
-		return new DevtoolsProperties();
+	public DeployerProperties devtoolsProperties() {
+		return new DeployerProperties();
 	}
 
 	@Bean

@@ -53,8 +53,8 @@ The `name` attribute is optional. If `waitUntilStarted` is true, Devtools will b
 - [X] Kafka Bus
 - [X] Easy inclusion of default deployables
 - [ ] Devtools landing page (links to various deployed artifacts & respecitve dashboards)
-- [ ] Spring Boot Admin?
 - [ ] H2 Database
 - [ ] Dataflow server
 - [ ] Cassandra Database
 - [ ] Library
+- [ ] Spring Boot Admin (Not compatible with Brixton)

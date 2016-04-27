@@ -8,3 +8,8 @@ eureka:
   server:
     renewal-percent-threshold: 0.01
     waitTimeInMsWhenSyncEmpty: 0
+
+info:
+  artifactId: @project.artifactId@
+  description: @project.description@
+  version: @project.version@

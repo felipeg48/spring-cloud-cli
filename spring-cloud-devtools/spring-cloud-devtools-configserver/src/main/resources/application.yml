@@ -13,3 +13,8 @@ server:
   port: 8888
 management:
   context-path: /admin
+
+info:
+  artifactId: @project.artifactId@
+  description: @project.description@
+  version: @project.version@

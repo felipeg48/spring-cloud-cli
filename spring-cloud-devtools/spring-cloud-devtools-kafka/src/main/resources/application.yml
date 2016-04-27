@@ -6,3 +6,8 @@ kafka:
 
 zk:
   port: 2181
+
+info:
+  artifactId: @project.artifactId@
+  description: @project.description@
+  version: @project.version@

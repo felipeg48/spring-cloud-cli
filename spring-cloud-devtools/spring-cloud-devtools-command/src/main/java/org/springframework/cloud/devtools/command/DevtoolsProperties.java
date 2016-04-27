@@ -30,6 +30,8 @@ public class DevtoolsProperties {
 
 	private List<Deployable> toDeploy = new ArrayList<>();
 
+	private int statusSleepMillis = 200;
+
 	public List<Deployable> getToDeploy() {
 		return toDeploy;
 	}
@@ -38,10 +40,19 @@ public class DevtoolsProperties {
 		this.toDeploy = toDeploy;
 	}
 
+	public int getStatusSleepMillis() {
+		return statusSleepMillis;
+	}
+
+	public void setStatusSleepMillis(int statusSleepMillis) {
+		this.statusSleepMillis = statusSleepMillis;
+	}
+
 	@Override
 	public String toString() {
 		final StringBuffer sb = new StringBuffer("DevtoolsProperties{");
 		sb.append("toDeploy=").append(toDeploy);
+		sb.append("statusSleepMillis=").append(statusSleepMillis);
 		sb.append('}');
 		return sb.toString();
 	}

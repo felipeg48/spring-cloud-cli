@@ -32,6 +32,7 @@ import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
+import org.springframework.cloud.devtools.command.DevtoolsProperties.Deployable;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.OrderComparator;
 
@@ -65,13 +66,13 @@ public class DevtoolsCommandThread extends Thread {
 
 		DevtoolsProperties properties = context.getBean(DevtoolsProperties.class);
 
-		ArrayList<DevtoolsProperties.Deployable> deployables = new ArrayList<>(properties.getToDeploy());
+		ArrayList<Deployable> deployables = new ArrayList<>(properties.getToDeploy());
 		OrderComparator.sort(deployables);
 
 		logger.debug("toDeploy {}", properties.getToDeploy());
 
-		for (DevtoolsProperties.Deployable deployable : deployables) {
-			deploy(deployer, deployable);
+		for (Deployable deployable : deployables) {
+			deploy(deployer, deployable, properties);
 		}
 
 		Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -101,11 +102,11 @@ public class DevtoolsCommandThread extends Thread {
 		}
 	}
 
-	private String deploy(AppDeployer deployer, DevtoolsProperties.Deployable deployable) {
+	private String deploy(AppDeployer deployer, Deployable deployable, DevtoolsProperties properties) {
 		MavenResource resource = MavenResource.parse(deployable.getCoordinates());
-		Map<String, String> properties = new HashMap<>();
-		properties.put("server.port", String.valueOf(deployable.getPort()));
-		AppDefinition definition = new AppDefinition(resource.getArtifactId(), properties);
+		Map<String, String> resourceProps = new HashMap<>();
+		resourceProps.put("server.port", String.valueOf(deployable.getPort()));
+		AppDefinition definition = new AppDefinition(resource.getArtifactId(), resourceProps);
 		Map<String, String> environmentProperties = Collections.singletonMap(AppDeployer.GROUP_PROPERTY_KEY, "devtools");
 		AppDeploymentRequest request = new AppDeploymentRequest(definition, resource, environmentProperties);
 
@@ -116,17 +117,29 @@ public class DevtoolsCommandThread extends Thread {
 		//TODO: stream stdout/stderr like docker-compose (with colors and prefix)
 
 		if (deployable.isWaitUntilStarted()) {
-			AppStatus appStatus = deployer.status(id);
+			try {
+				AppStatus appStatus = getAppStatus(deployer, id);
 
-			String description = deployable.getName() != null ? deployable.getName() : resource.getArtifactId();
-			logger.info("\n\nWaiting for {} to start.\n", description);
+				String description = deployable.getName() != null ? deployable.getName() : resource.getArtifactId();
+				logger.info("\n\nWaiting for {} to start.\n", description);
 
-			//TODO: is there a better way to wait?
-			while (appStatus.getState() != DeploymentState.deployed) {
+				while (appStatus.getState() != DeploymentState.deployed
+						&& appStatus.getState() != DeploymentState.failed) {
+					Thread.sleep(properties.getStatusSleepMillis());
+					appStatus = getAppStatus(deployer, id);
+				}
+			} catch (Exception e) {
+				logger.error("error updating status of " + id, e);
 			}
 		}
 
 		return id;
+	}
+
+	private AppStatus getAppStatus(AppDeployer deployer, String id) {
+		AppStatus appStatus = deployer.status(id);
+		this.deployed.put(id, appStatus.getState());
+		return appStatus;
 	}
 
 

@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.devtools.cli;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -24,6 +25,7 @@ import org.junit.Test;
 public class DevtoolsCommandTests {
 
 	@Test
+	@Ignore
 	public void testLoadDeployer() throws Exception {
 		//new DevtoolsCommand().populateClassloader();
 		new DevtoolsCommand().run();

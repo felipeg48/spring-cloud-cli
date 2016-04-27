@@ -16,8 +16,10 @@
 
 package org.springframework.cloud.devtools.cli;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -27,13 +29,13 @@ import org.springframework.boot.autoconfigure.PropertyPlaceholderAutoConfigurati
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.cli.command.AbstractCommand;
 import org.springframework.boot.cli.command.status.ExitStatus;
-import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.resource.maven.MavenResource;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
+import org.springframework.cloud.devtools.cli.DevtoolsProperties.Deployable;
 import org.springframework.context.ConfigurableApplicationContext;
 
 /**
@@ -58,24 +60,36 @@ public class DevtoolsCommand extends AbstractCommand {
 
 		final AppDeployer deployer = context.getBean(AppDeployer.class);
 
-		String configServerId = deploy(deployer, "org.springframework.cloud.devtools", "spring-cloud-devtools-configserver", "1.1.0.BUILD-SNAPSHOT", 8888);
+		DevtoolsProperties properties = context.getBean(DevtoolsProperties.class);
 
-		AppStatus configServerStatus = deployer.status(configServerId);
+		logger.debug("toDeploy {}", properties.getToDeploy());
 
-		logger.info("\n\nWaiting for configserver to start.\n");
-		//TODO: is there a better way to wait?
-		while (configServerStatus.getState() != DeploymentState.deployed) {
+		ArrayList<Deployable> deployables = new ArrayList<>(properties.getToDeploy());
+
+		Deployable configServer = extractConfigServer(deployables);
+
+		if (configServer != null) {
+			String configServerId = deploy(deployer, configServer);
+
+			AppStatus configServerStatus = deployer.status(configServerId);
+
+			logger.info("\n\nWaiting for configserver to start.\n");
+
+			//TODO: is there a better way to wait?
+			while (configServerStatus.getState() != DeploymentState.deployed) {
+			}
 		}
 
-		deploy(deployer, "org.springframework.cloud.devtools", "spring-cloud-devtools-eureka", "1.1.0.BUILD-SNAPSHOT", 8761);
+		for (Deployable deployable : deployables) {
+			deploy(deployer, deployable);
+		}
 
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			@Override
 			public void run() {
 				for (String id : DevtoolsCommand.this.deployed.keySet()) {
-					logger.info("Undeploying id: {}", id);
+					logger.info("Undeploying {}", id);
 					deployer.undeploy(id);
-					logger.info("Status of {}: {}", id, deployer.status(id));
 				}
 			}
 		});
@@ -96,28 +110,30 @@ public class DevtoolsCommand extends AbstractCommand {
 		}
 	}
 
-	private String deploy(AppDeployer deployer, String groupId, String artifactId, String version, int port) {
-		String id = deployer.deploy(createAppDeploymentRequest(groupId, artifactId, version, port));
+	private Deployable extractConfigServer(ArrayList<Deployable> deployables) {
+		for (Iterator<Deployable> iterator = deployables.iterator(); iterator.hasNext();) {
+			Deployable deployable = iterator.next();
+			if ("configserver".equals(deployable.getName())) {
+				iterator.remove();
+				return deployable;
+			}
+		}
+		return null;
+	}
+
+	private String deploy(AppDeployer deployer, Deployable deployable) {
+		MavenResource resource = MavenResource.parse(deployable.getCoordinates());
+		Map<String, String> properties = new HashMap<>();
+		properties.put("server.port", String.valueOf(deployable.getPort()));
+		AppDefinition definition = new AppDefinition(resource.getArtifactId(), properties);
+		Map<String, String> environmentProperties = Collections.singletonMap(AppDeployer.GROUP_PROPERTY_KEY, "devtools");
+		AppDeploymentRequest request = new AppDeploymentRequest(definition, resource, environmentProperties);
+
+		String id = deployer.deploy(request);
 		AppStatus status = deployer.status(id);
 		logger.info("Status of {}: {}", id, status);
 		this.deployed.put(id, status.getState());
 		//TODO: stream stdout/stderr like docker-compose (with colors and prefix)
 		return id;
-	}
-
-
-	private static AppDeploymentRequest createAppDeploymentRequest(String groupId, String artifactId, String version, int port) {
-		MavenResource resource = new MavenResource.Builder(new MavenProperties())
-				.groupId(groupId)
-				.artifactId(artifactId)
-				.version(version)
-				.extension("jar")
-				.build();
-		Map<String, String> properties = new HashMap<>();
-		properties.put("server.port", String.valueOf(port));
-		AppDefinition definition = new AppDefinition(artifactId, properties);
-		Map<String, String> environmentProperties = Collections.singletonMap(AppDeployer.GROUP_PROPERTY_KEY, "devtools");
-		AppDeploymentRequest request = new AppDeploymentRequest(definition, resource, environmentProperties);
-		return request;
 	}
 }

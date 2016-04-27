@@ -1,0 +1,13 @@
+_dt:
+  groupId: org.springframework.cloud.devtools
+  version: 1.1.0.BUILD-SNAPSHOT
+spring:
+  cloud:
+    devtools:
+      to-deploy:
+        - name: configserver
+          coordinates: ${_dt.groupId}:spring-cloud-devtools-configserver:${_dt.version}
+          port: 8888
+        - name: eureka
+          coordinates: ${_dt.groupId}:spring-cloud-devtools-eureka:${_dt.version}
+          port: 8761

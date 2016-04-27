@@ -20,6 +20,26 @@ $ spring cloud
 
 Currently starts configserver on port 8888 and then eureka on port 8761.
 
+### Configuring
+
+Spring Cloud Devtools use normal Spring Boot configuration mechanisms. The config name is `cloud`, so configuration can go in `cloud.yml` or `cloud.properties`.
+
+For example, to run configserver and eureka, create a `cloud.yml` that looks like:
+```
+spring:
+  cloud:
+    devtools:
+      to-deploy:
+        - name: configserver
+          coordinates: org.springframework.cloud.devtools:spring-cloud-devtools-configserver:1.1.0.BUILD-SNAPSHOT
+          port: 8888
+        - name: eureka
+          coordinates: org.springframework.cloud.devtools:spring-cloud-devtools-eureka:1.1.0.BUILD-SNAPSHOT
+          port: 8761
+```
+
+The `name` attribute is optional, but the first one named `configserver` will be started first and will block until it has started.
+
 ### Stopping
 
 `Ctrl-C` in the same terminal `spring cloud` was run.

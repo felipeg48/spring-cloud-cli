@@ -32,6 +32,11 @@ import org.springframework.context.annotation.Configuration;
 public class DevtoolsCommandConfiguration {
 
 	@Bean
+	public DevtoolsProperties devtoolsProperties() {
+		return new DevtoolsProperties();
+	}
+
+	@Bean
 	public LocalDeployerProperties localDeployerProperties() {
 		return new LocalDeployerProperties();
 	}

@@ -51,9 +51,9 @@ The `name` attribute is optional. If `waitUntilStarted` is true, Devtools will b
 - [X] Hystrix Dashboard
 - [X] Kafka Broker
 - [X] Kafka Bus
+- [X] Easy inclusion of default deployables
 - [ ] Devtools landing page (links to various deployed artifacts & respecitve dashboards)
 - [ ] Spring Boot Admin?
-- [ ] Easy exclusion/inclusion of default deployables
 - [ ] H2 Database
 - [ ] Dataflow server
 - [ ] Cassandra Database

@@ -19,4 +19,4 @@ devtools:
       port: 9091
       waitUntilStarted: true
       order: -200
-  deploy: configserver,eureka, hystrixdashboard,kafka
+  deploy: ${deploy:configserver,eureka, hystrixdashboard,kafka}

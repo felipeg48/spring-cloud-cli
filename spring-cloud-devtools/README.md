@@ -56,5 +56,5 @@ The `name` attribute is optional. If `waitUntilStarted` is true, Devtools will b
 - [ ] H2 Database
 - [ ] Dataflow server
 - [ ] Cassandra Database
-- [ ] Library
+- [ ] Client Side Library
 - [ ] Spring Boot Admin (Not compatible with Brixton)

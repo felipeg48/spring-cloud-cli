@@ -35,7 +35,6 @@ import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 import org.springframework.boot.cli.command.AbstractCommand;
-import org.springframework.boot.cli.command.OptionParsingCommand;
 import org.springframework.boot.cli.command.archive.JarCommand;
 import org.springframework.boot.cli.command.grab.GrabCommand;
 import org.springframework.boot.cli.command.run.RunCommand;
@@ -105,7 +104,7 @@ public class CliTester implements TestRule {
 		return getOutput();
 	}
 
-	private <T extends OptionParsingCommand> Future<T> submitCommand(final T command,
+	private <T extends AbstractCommand> Future<T> submitCommand(final T command,
 			String... args) {
 		clearUrlHandler();
 		final String[] sources = getSources(args);

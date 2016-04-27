@@ -34,8 +34,6 @@ import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
-import org.springframework.cloud.deployer.spi.local.LocalAppDeployer;
-import org.springframework.cloud.deployer.spi.local.LocalDeployerProperties;
 import org.springframework.context.ConfigurableApplicationContext;
 
 /**
@@ -53,14 +51,12 @@ public class DevtoolsCommand extends AbstractCommand {
 
 	@Override
 	public ExitStatus run(String... args) throws Exception {
-		ConfigurableApplicationContext context = new SpringApplicationBuilder(PropertyPlaceholderAutoConfiguration.class)
+		ConfigurableApplicationContext context = new SpringApplicationBuilder(PropertyPlaceholderAutoConfiguration.class, DevtoolsCommandConfiguration.class)
 				.web(false)
 				.properties("spring.config.name=cloud")
 				.run(args);
 
-		//TODO: configurable AppDeployer? (ie deploy to CF)
-		//TODO: use options to populate LocalDeployerProperties
-		final LocalAppDeployer deployer = new LocalAppDeployer(new LocalDeployerProperties());
+		final AppDeployer deployer = context.getBean(AppDeployer.class);
 
 		String configServerId = deploy(deployer, "org.springframework.cloud.devtools", "spring-cloud-devtools-configserver", "1.1.0.BUILD-SNAPSHOT", 8888);
 
@@ -100,7 +96,7 @@ public class DevtoolsCommand extends AbstractCommand {
 		}
 	}
 
-	private String deploy(LocalAppDeployer deployer, String groupId, String artifactId, String version, int port) {
+	private String deploy(AppDeployer deployer, String groupId, String artifactId, String version, int port) {
 		String id = deployer.deploy(createAppDeploymentRequest(groupId, artifactId, version, port));
 		AppStatus status = deployer.status(id);
 		logger.info("Status of {}: {}", id, status);

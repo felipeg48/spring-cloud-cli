@@ -55,7 +55,7 @@ public class DevtoolsCommand extends AbstractCommand {
 	public ExitStatus run(String... args) throws Exception {
 		ConfigurableApplicationContext context = new SpringApplicationBuilder(PropertyPlaceholderAutoConfiguration.class, DevtoolsCommandConfiguration.class)
 				.web(false)
-				.properties("spring.config.name=cloud")
+				.properties("spring.config.name=cloud", "banner.location=devtools-banner.txt")
 				.run(args);
 
 		final AppDeployer deployer = context.getBean(AppDeployer.class);

@@ -1,15 +1,18 @@
-_dt:
-  groupId: org.springframework.cloud.devtools
-  version: 1.1.0.BUILD-SNAPSHOT
+dt:
+  pre: org.springframework.cloud.devtools:spring-cloud-devtools-
+  ver: 1.1.0.BUILD-SNAPSHOT
 spring:
   cloud:
     devtools:
       to-deploy:
         - name: configserver
-          coordinates: ${_dt.groupId}:spring-cloud-devtools-configserver:${_dt.version}
+          coordinates: ${dt.pre}configserver:${dt.ver}
           port: 8888
           waitUntilStarted: true
           order: -100
         - name: eureka
-          coordinates: ${_dt.groupId}:spring-cloud-devtools-eureka:${_dt.version}
+          coordinates: ${dt.pre}eureka:${dt.ver}
           port: 8761
+        - name: hystrixdashboard
+          coordinates: ${dt.pre}hystrixdashboard:${dt.ver}
+          port: 7979

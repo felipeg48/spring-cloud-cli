@@ -22,5 +22,6 @@
 		<module>spring-cloud-devtools-command</module>
 		<module>spring-cloud-devtools-configserver</module>
 		<module>spring-cloud-devtools-eureka</module>
+		<module>spring-cloud-devtools-hystrixdashboard</module>
 	</modules>
 </project>

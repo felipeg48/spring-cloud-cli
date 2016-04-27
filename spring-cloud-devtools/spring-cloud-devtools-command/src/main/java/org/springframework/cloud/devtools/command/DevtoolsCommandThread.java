@@ -78,6 +78,7 @@ public class DevtoolsCommandThread extends Thread {
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			@Override
 			public void run() {
+				logger.info("\n\nShutting down ...\n");
 				for (String id : DevtoolsCommandThread.this.deployed.keySet()) {
 					logger.info("Undeploying {}", id);
 					deployer.undeploy(id);

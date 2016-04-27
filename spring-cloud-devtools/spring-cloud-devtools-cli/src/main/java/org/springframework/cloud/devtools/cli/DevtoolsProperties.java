@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.core.Ordered;
 
 /**
  * @author Spencer Gibb
@@ -45,10 +46,12 @@ public class DevtoolsProperties {
 		return sb.toString();
 	}
 
-	public static class Deployable {
+	public static class Deployable implements Ordered {
 		private String coordinates;
 		private String name;
 		private int port = 0;
+		private boolean waitUntilStarted;
+		private int order = 0;
 
 		public String getCoordinates() {
 			return coordinates;
@@ -74,12 +77,31 @@ public class DevtoolsProperties {
 			this.port = port;
 		}
 
+		public boolean isWaitUntilStarted() {
+			return waitUntilStarted;
+		}
+
+		public void setWaitUntilStarted(boolean waitUntilStarted) {
+			this.waitUntilStarted = waitUntilStarted;
+		}
+
+		@Override
+		public int getOrder() {
+			return order;
+		}
+
+		public void setOrder(int order) {
+			this.order = order;
+		}
+
 		@Override
 		public String toString() {
 			final StringBuffer sb = new StringBuffer("Deployable{");
 			sb.append("coordinates='").append(coordinates).append('\'');
 			sb.append(", name='").append(name).append('\'');
 			sb.append(", port=").append(port);
+			sb.append(", waitUntilStarted=").append(waitUntilStarted);
+			sb.append(", order=").append(order);
 			sb.append('}');
 			return sb.toString();
 		}

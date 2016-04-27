@@ -33,12 +33,14 @@ spring:
         - name: configserver
           coordinates: org.springframework.cloud.devtools:spring-cloud-devtools-configserver:1.1.0.BUILD-SNAPSHOT
           port: 8888
+          waitUntilStarted: true
+          order: -10
         - name: eureka
           coordinates: org.springframework.cloud.devtools:spring-cloud-devtools-eureka:1.1.0.BUILD-SNAPSHOT
           port: 8761
 ```
 
-The `name` attribute is optional, but the first one named `configserver` will be started first and will block until it has started.
+The `name` attribute is optional. If `waitUntilStarted` is true, Devtools will block until the application has reached the `deployed` state. Before commands are deployed, the list is sorted using Spring's `OrderComparator`. In the above case, `configserver` is deployed before any other app is deployed.
 
 ### Stopping
 

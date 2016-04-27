@@ -19,7 +19,6 @@ package org.springframework.cloud.devtools.cli;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -37,6 +36,7 @@ import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.devtools.cli.DevtoolsProperties.Deployable;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.OrderComparator;
 
 /**
  * @author Spencer Gibb
@@ -62,23 +62,10 @@ public class DevtoolsCommand extends AbstractCommand {
 
 		DevtoolsProperties properties = context.getBean(DevtoolsProperties.class);
 
-		logger.debug("toDeploy {}", properties.getToDeploy());
-
 		ArrayList<Deployable> deployables = new ArrayList<>(properties.getToDeploy());
+		OrderComparator.sort(deployables);
 
-		Deployable configServer = extractConfigServer(deployables);
-
-		if (configServer != null) {
-			String configServerId = deploy(deployer, configServer);
-
-			AppStatus configServerStatus = deployer.status(configServerId);
-
-			logger.info("\n\nWaiting for configserver to start.\n");
-
-			//TODO: is there a better way to wait?
-			while (configServerStatus.getState() != DeploymentState.deployed) {
-			}
-		}
+		logger.debug("toDeploy {}", properties.getToDeploy());
 
 		for (Deployable deployable : deployables) {
 			deploy(deployer, deployable);
@@ -110,17 +97,6 @@ public class DevtoolsCommand extends AbstractCommand {
 		}
 	}
 
-	private Deployable extractConfigServer(ArrayList<Deployable> deployables) {
-		for (Iterator<Deployable> iterator = deployables.iterator(); iterator.hasNext();) {
-			Deployable deployable = iterator.next();
-			if ("configserver".equals(deployable.getName())) {
-				iterator.remove();
-				return deployable;
-			}
-		}
-		return null;
-	}
-
 	private String deploy(AppDeployer deployer, Deployable deployable) {
 		MavenResource resource = MavenResource.parse(deployable.getCoordinates());
 		Map<String, String> properties = new HashMap<>();
@@ -134,6 +110,18 @@ public class DevtoolsCommand extends AbstractCommand {
 		logger.info("Status of {}: {}", id, status);
 		this.deployed.put(id, status.getState());
 		//TODO: stream stdout/stderr like docker-compose (with colors and prefix)
+
+		if (deployable.isWaitUntilStarted()) {
+			AppStatus appStatus = deployer.status(id);
+
+			String description = deployable.getName() != null ? deployable.getName() : resource.getArtifactId();
+			logger.info("\n\nWaiting for {} to start.\n", description);
+
+			//TODO: is there a better way to wait?
+			while (appStatus.getState() != DeploymentState.deployed) {
+			}
+		}
+
 		return id;
 	}
 }

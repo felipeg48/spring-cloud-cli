@@ -8,6 +8,8 @@ spring:
         - name: configserver
           coordinates: ${_dt.groupId}:spring-cloud-devtools-configserver:${_dt.version}
           port: 8888
+          waitUntilStarted: true
+          order: -100
         - name: eureka
           coordinates: ${_dt.groupId}:spring-cloud-devtools-eureka:${_dt.version}
           port: 8761

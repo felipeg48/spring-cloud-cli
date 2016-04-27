@@ -26,18 +26,16 @@ Spring Cloud Devtools use normal Spring Boot configuration mechanisms. The confi
 
 For example, to run configserver and eureka, create a `cloud.yml` that looks like:
 ```
-spring:
-  cloud:
-    devtools:
-      to-deploy:
-        - name: configserver
-          coordinates: org.springframework.cloud.devtools:spring-cloud-devtools-configserver:1.1.0.BUILD-SNAPSHOT
-          port: 8888
-          waitUntilStarted: true
-          order: -10
-        - name: eureka
-          coordinates: org.springframework.cloud.devtools:spring-cloud-devtools-eureka:1.1.0.BUILD-SNAPSHOT
-          port: 8761
+devtools:
+  deployables:
+    - name: configserver
+      coordinates: org.springframework.cloud.devtools:spring-cloud-devtools-configserver:1.1.0.BUILD-SNAPSHOT
+      port: 8888
+      waitUntilStarted: true
+      order: -10
+    - name: eureka
+      coordinates: org.springframework.cloud.devtools:spring-cloud-devtools-eureka:1.1.0.BUILD-SNAPSHOT
+      port: 8761
 ```
 
 The `name` attribute is optional. If `waitUntilStarted` is true, Devtools will block until the application has reached the `deployed` state. Before commands are deployed, the list is sorted using Spring's `OrderComparator`. In the above case, `configserver` is deployed before any other app is deployed.

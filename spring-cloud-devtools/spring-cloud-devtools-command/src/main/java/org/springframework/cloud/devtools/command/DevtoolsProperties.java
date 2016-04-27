@@ -25,19 +25,29 @@ import org.springframework.core.Ordered;
 /**
  * @author Spencer Gibb
  */
-@ConfigurationProperties(prefix = "spring.cloud.devtools")
+@ConfigurationProperties(prefix = "devtools")
 public class DevtoolsProperties {
 
-	private List<Deployable> toDeploy = new ArrayList<>();
+	private List<Deployable> deployables = new ArrayList<>();
+
+	private List<String> deploy = new ArrayList<>();
 
 	private int statusSleepMillis = 200;
 
-	public List<Deployable> getToDeploy() {
-		return toDeploy;
+	public List<Deployable> getDeployables() {
+		return deployables;
 	}
 
-	public void setToDeploy(List<Deployable> toDeploy) {
-		this.toDeploy = toDeploy;
+	public void setDeployables(List<Deployable> deployables) {
+		this.deployables = deployables;
+	}
+
+	public List<String> getDeploy() {
+		return deploy;
+	}
+
+	public void setDeploy(List<String> deploy) {
+		this.deploy = deploy;
 	}
 
 	public int getStatusSleepMillis() {
@@ -51,7 +61,8 @@ public class DevtoolsProperties {
 	@Override
 	public String toString() {
 		final StringBuffer sb = new StringBuffer("DevtoolsProperties{");
-		sb.append("toDeploy=").append(toDeploy);
+		sb.append("deployables=").append(deployables);
+		sb.append("deploy=").append(deploy);
 		sb.append("statusSleepMillis=").append(statusSleepMillis);
 		sb.append('}');
 		return sb.toString();

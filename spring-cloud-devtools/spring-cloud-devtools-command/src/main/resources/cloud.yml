@@ -1,23 +1,22 @@
 dt:
   pre: org.springframework.cloud.devtools:spring-cloud-devtools-
   ver: 1.1.0.BUILD-SNAPSHOT
-spring:
-  cloud:
-    devtools:
-      to-deploy:
-        - name: configserver
-          coordinates: ${dt.pre}configserver:${dt.ver}
-          port: 8888
-          waitUntilStarted: true
-          order: -100
-        - name: eureka
-          coordinates: ${dt.pre}eureka:${dt.ver}
-          port: 8761
-        - name: hystrixdashboard
-          coordinates: ${dt.pre}hystrixdashboard:${dt.ver}
-          port: 7979
-        - name: kafka
-          coordinates: ${dt.pre}kafka:${dt.ver}
-          port: 9091
-          waitUntilStarted: true
-          order: -200
+devtools:
+  deployables:
+    - name: configserver
+      coordinates: ${dt.pre}configserver:${dt.ver}
+      port: 8888
+      waitUntilStarted: true
+      order: -100
+    - name: eureka
+      coordinates: ${dt.pre}eureka:${dt.ver}
+      port: 8761
+    - name: hystrixdashboard
+      coordinates: ${dt.pre}hystrixdashboard:${dt.ver}
+      port: 7979
+    - name: kafka
+      coordinates: ${dt.pre}kafka:${dt.ver}
+      port: 9091
+      waitUntilStarted: true
+      order: -200
+  deploy: configserver,eureka, hystrixdashboard,kafka

@@ -35,6 +35,7 @@ import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.devtools.command.DevtoolsProperties.Deployable;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.OrderComparator;
+import org.springframework.util.StringUtils;
 
 /**
  * @author Spencer Gibb
@@ -66,10 +67,10 @@ public class DevtoolsCommandThread extends Thread {
 
 		DevtoolsProperties properties = context.getBean(DevtoolsProperties.class);
 
-		ArrayList<Deployable> deployables = new ArrayList<>(properties.getToDeploy());
+		ArrayList<Deployable> deployables = new ArrayList<>(properties.getDeployables());
 		OrderComparator.sort(deployables);
 
-		logger.debug("toDeploy {}", properties.getToDeploy());
+		logger.debug("toDeploy {}", properties.getDeployables());
 
 		for (Deployable deployable : deployables) {
 			deploy(deployer, deployable, properties);
@@ -109,10 +110,19 @@ public class DevtoolsCommandThread extends Thread {
 	}
 
 	private String deploy(AppDeployer deployer, Deployable deployable, DevtoolsProperties properties) {
+		if (StringUtils.hasText(deployable.getName())
+				&& !properties.getDeploy().contains(deployable.getName())) {
+			// this deployable isn't in the list of things to deploy
+			logger.info("Skipping deploy of {}", deployable.getName());
+			return null;
+		}
+
 		MavenResource resource = MavenResource.parse(deployable.getCoordinates());
-		Map<String, String> resourceProps = new HashMap<>();
-		resourceProps.put("server.port", String.valueOf(deployable.getPort()));
-		AppDefinition definition = new AppDefinition(resource.getArtifactId(), resourceProps);
+
+		Map<String, String> appDefProps = new HashMap<>();
+		appDefProps.put("server.port", String.valueOf(deployable.getPort()));
+		AppDefinition definition = new AppDefinition(resource.getArtifactId(), appDefProps);
+
 		Map<String, String> environmentProperties = Collections.singletonMap(AppDeployer.GROUP_PROPERTY_KEY, "devtools");
 		AppDeploymentRequest request = new AppDeploymentRequest(definition, resource, environmentProperties);
 

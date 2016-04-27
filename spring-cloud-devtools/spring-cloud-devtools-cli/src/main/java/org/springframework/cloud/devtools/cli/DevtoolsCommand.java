@@ -23,8 +23,9 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.cli.command.OptionParsingCommand;
-import org.springframework.boot.cli.command.options.OptionHandler;
+import org.springframework.boot.autoconfigure.PropertyPlaceholderAutoConfiguration;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.cli.command.AbstractCommand;
 import org.springframework.boot.cli.command.status.ExitStatus;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.resource.maven.MavenResource;
@@ -35,79 +36,77 @@ import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.local.LocalAppDeployer;
 import org.springframework.cloud.deployer.spi.local.LocalDeployerProperties;
-
-import joptsimple.OptionSet;
+import org.springframework.context.ConfigurableApplicationContext;
 
 /**
  * @author Spencer Gibb
  */
-public class DevtoolsCommand extends OptionParsingCommand {
+public class DevtoolsCommand extends AbstractCommand {
 
 	private static final Logger logger = LoggerFactory.getLogger(DevtoolsCommand.class);
 
+	private Map<String, DeploymentState> deployed = new LinkedHashMap<>();
+
 	public DevtoolsCommand() {
-		super("devtools", "Start Spring Cloud DevTools", new DevtoolsOptionHandler());
+		super("cloud", "Start Spring Cloud DevTools");
 	}
 
-	private static class DevtoolsOptionHandler extends OptionHandler {
+	@Override
+	public ExitStatus run(String... args) throws Exception {
+		ConfigurableApplicationContext context = new SpringApplicationBuilder(PropertyPlaceholderAutoConfiguration.class)
+				.web(false)
+				.properties("spring.config.name=cloud")
+				.run(args);
 
-		private Map<String, DeploymentState> deployed = new LinkedHashMap<>();
+		//TODO: configurable AppDeployer? (ie deploy to CF)
+		//TODO: use options to populate LocalDeployerProperties
+		final LocalAppDeployer deployer = new LocalAppDeployer(new LocalDeployerProperties());
 
-		@Override
-		protected ExitStatus run(OptionSet options) throws Exception {
-			logger.info("Starting Spring Cloud Devtools...");
-			//TODO: print banner
+		String configServerId = deploy(deployer, "org.springframework.cloud.devtools", "spring-cloud-devtools-configserver", "1.1.0.BUILD-SNAPSHOT", 8888);
 
-			//TODO: configurable AppDeployer? (ie deploy to CF)
-			//TODO: use options to populate LocalDeployerProperties
-			final LocalAppDeployer deployer = new LocalAppDeployer(new LocalDeployerProperties());
+		AppStatus configServerStatus = deployer.status(configServerId);
 
-			String configServerId = deploy(deployer, "org.springframework.cloud.devtools", "spring-cloud-devtools-configserver", "1.1.0.BUILD-SNAPSHOT", 8888);
-
-			AppStatus configServerStatus = deployer.status(configServerId);
-
-			logger.info("\n\nWaiting for configserver to start.\n");
-			//TODO: is there a better way to wait?
-			while (configServerStatus.getState() != DeploymentState.deployed) {
-			}
-
-			deploy(deployer, "org.springframework.cloud.devtools", "spring-cloud-devtools-eureka", "1.1.0.BUILD-SNAPSHOT", 8761);
-
-			Runtime.getRuntime().addShutdownHook(new Thread() {
-				@Override
-				public void run() {
-					for (String id : DevtoolsOptionHandler.this.deployed.keySet()) {
-						logger.info("Undeploying id: {}", id);
-						deployer.undeploy(id);
-						logger.info("Status of {}: {}", id, deployer.status(id));
-					}
-				}
-			});
-
-			logger.info("Type Ctrl-C to quit.");
-
-			while (true) {
-				for (Map.Entry<String, DeploymentState> entry : this.deployed.entrySet()) {
-					/*String id = entry.getKey();
-					DeploymentState state = entry.getValue();
-					AppStatus status = deployer.status(id);
-					DeploymentState newState = status.getState();
-					if (state != newState) {
-						logger.info("{} change status from {} to {}", id, state, newState);
-						this.deployed.put(id, newState);
-					}*/
-				}
-			}
+		logger.info("\n\nWaiting for configserver to start.\n");
+		//TODO: is there a better way to wait?
+		while (configServerStatus.getState() != DeploymentState.deployed) {
 		}
 
-		private String deploy(LocalAppDeployer deployer, String groupId, String artifactId, String version, int port) {
-			String id = deployer.deploy(createAppDeploymentRequest(groupId, artifactId, version, port));
-			AppStatus status = deployer.status(id);
-			logger.info("Status of {}: {}", id, status);
-			this.deployed.put(id, status.getState());
-			//TODO: stream stdout/stderr like docker-compose (with colors and prefix)
-			return id;
+		deploy(deployer, "org.springframework.cloud.devtools", "spring-cloud-devtools-eureka", "1.1.0.BUILD-SNAPSHOT", 8761);
+
+		Runtime.getRuntime().addShutdownHook(new Thread() {
+			@Override
+			public void run() {
+				for (String id : DevtoolsCommand.this.deployed.keySet()) {
+					logger.info("Undeploying id: {}", id);
+					deployer.undeploy(id);
+					logger.info("Status of {}: {}", id, deployer.status(id));
+				}
+			}
+		});
+
+		logger.info("Type Ctrl-C to quit.");
+
+		while (true) {
+			/*for (Map.Entry<String, DeploymentState> entry : this.deployed.entrySet()) {
+				String id = entry.getKey();
+				DeploymentState state = entry.getValue();
+				AppStatus status = deployer.status(id);
+				DeploymentState newState = status.getState();
+				if (state != newState) {
+					logger.info("{} change status from {} to {}", id, state, newState);
+					this.deployed.put(id, newState);
+				}
+			}*/
 		}
+	}
+
+	private String deploy(LocalAppDeployer deployer, String groupId, String artifactId, String version, int port) {
+		String id = deployer.deploy(createAppDeploymentRequest(groupId, artifactId, version, port));
+		AppStatus status = deployer.status(id);
+		logger.info("Status of {}: {}", id, status);
+		this.deployed.put(id, status.getState());
+		//TODO: stream stdout/stderr like docker-compose (with colors and prefix)
+		return id;
 	}
 
 

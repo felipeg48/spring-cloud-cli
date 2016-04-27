@@ -15,14 +15,14 @@ $ spring install org.springframework.cloud:spring-cloud-cli:1.1.0.BUILD-SNAPSHOT
 ### Running
 
 ```
-$ spring devtools
+$ spring cloud
 ```
 
 Currently starts configserver on port 8888 and then eureka on port 8761.
 
 ### Stopping
 
-`Ctrl-C` in the same terminal `spring devtools` was run.
+`Ctrl-C` in the same terminal `spring cloud` was run.
 
 ### TODO
 

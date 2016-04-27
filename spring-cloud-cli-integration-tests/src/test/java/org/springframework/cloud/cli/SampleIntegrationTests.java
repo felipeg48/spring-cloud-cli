@@ -20,6 +20,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.net.URI;
 
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -77,6 +78,7 @@ public class SampleIntegrationTests {
 	}
 
 	@Test
+	@Ignore
 	public void devtools() throws Exception {
 		this.cli.devtools();
 	}

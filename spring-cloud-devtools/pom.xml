@@ -19,6 +19,7 @@
 
 	<modules>
 		<module>spring-cloud-devtools-cli</module>
+		<module>spring-cloud-devtools-command</module>
 		<module>spring-cloud-devtools-configserver</module>
 		<module>spring-cloud-devtools-eureka</module>
 	</modules>

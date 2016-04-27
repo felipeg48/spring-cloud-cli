@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.devtools.cli;
+package org.springframework.cloud.devtools.command;
 
 import java.util.ArrayList;
 import java.util.List;

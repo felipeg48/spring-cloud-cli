@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.devtools.cli;
+package org.springframework.cloud.devtools.command;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;

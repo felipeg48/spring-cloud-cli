@@ -16,36 +16,34 @@
 
 package org.springframework.cloud.devtools.cli;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.io.File;
+import java.lang.reflect.Constructor;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URLClassLoader;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.PropertyPlaceholderAutoConfiguration;
-import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.codehaus.groovy.control.CompilerConfiguration;
 import org.springframework.boot.cli.command.AbstractCommand;
 import org.springframework.boot.cli.command.status.ExitStatus;
-import org.springframework.cloud.deployer.resource.maven.MavenResource;
-import org.springframework.cloud.deployer.spi.app.AppDeployer;
-import org.springframework.cloud.deployer.spi.app.AppStatus;
-import org.springframework.cloud.deployer.spi.app.DeploymentState;
-import org.springframework.cloud.deployer.spi.core.AppDefinition;
-import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
-import org.springframework.cloud.devtools.cli.DevtoolsProperties.Deployable;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.core.OrderComparator;
+import org.springframework.boot.cli.compiler.RepositoryConfigurationFactory;
+import org.springframework.boot.cli.compiler.grape.AetherGrapeEngine;
+import org.springframework.boot.cli.compiler.grape.AetherGrapeEngineFactory;
+import org.springframework.boot.cli.compiler.grape.DependencyResolutionContext;
+import org.springframework.boot.cli.compiler.grape.RepositoryConfiguration;
+
+import groovy.lang.GroovyClassLoader;
 
 /**
  * @author Spencer Gibb
  */
 public class DevtoolsCommand extends AbstractCommand {
 
-	private static final Logger logger = LoggerFactory.getLogger(DevtoolsCommand.class);
-
-	private Map<String, DeploymentState> deployed = new LinkedHashMap<>();
+	public static final Log log = LogFactory.getLog(DevtoolsCommand.class);
 
 	public DevtoolsCommand() {
 		super("cloud", "Start Spring Cloud DevTools");
@@ -53,75 +51,59 @@ public class DevtoolsCommand extends AbstractCommand {
 
 	@Override
 	public ExitStatus run(String... args) throws Exception {
-		ConfigurableApplicationContext context = new SpringApplicationBuilder(PropertyPlaceholderAutoConfiguration.class, DevtoolsCommandConfiguration.class)
-				.web(false)
-				.properties("spring.config.name=cloud", "banner.location=devtools-banner.txt")
-				.run(args);
 
-		final AppDeployer deployer = context.getBean(AppDeployer.class);
+		try {
+			URLClassLoader classLoader = populateClassloader();
 
-		DevtoolsProperties properties = context.getBean(DevtoolsProperties.class);
+			String name = "org.springframework.cloud.devtools.command.DevtoolsCommandThread";
+			Class<?> threadClass = classLoader.loadClass(name);
 
-		ArrayList<Deployable> deployables = new ArrayList<>(properties.getToDeploy());
-		OrderComparator.sort(deployables);
-
-		logger.debug("toDeploy {}", properties.getToDeploy());
-
-		for (Deployable deployable : deployables) {
-			deploy(deployer, deployable);
+			Constructor<?> constructor = threadClass.getConstructor(ClassLoader.class, String[].class);
+			Thread thread = (Thread) constructor.newInstance(classLoader, args);
+			thread.start();
+			thread.join();
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 
-		Runtime.getRuntime().addShutdownHook(new Thread() {
-			@Override
-			public void run() {
-				for (String id : DevtoolsCommand.this.deployed.keySet()) {
-					logger.info("Undeploying {}", id);
-					deployer.undeploy(id);
-				}
-			}
-		});
-
-		logger.info("Type Ctrl-C to quit.");
-
-		while (true) {
-			/*for (Map.Entry<String, DeploymentState> entry : this.deployed.entrySet()) {
-				String id = entry.getKey();
-				DeploymentState state = entry.getValue();
-				AppStatus status = deployer.status(id);
-				DeploymentState newState = status.getState();
-				if (state != newState) {
-					logger.info("{} change status from {} to {}", id, state, newState);
-					this.deployed.put(id, newState);
-				}
-			}*/
-		}
+		return ExitStatus.OK;
 	}
 
-	private String deploy(AppDeployer deployer, Deployable deployable) {
-		MavenResource resource = MavenResource.parse(deployable.getCoordinates());
-		Map<String, String> properties = new HashMap<>();
-		properties.put("server.port", String.valueOf(deployable.getPort()));
-		AppDefinition definition = new AppDefinition(resource.getArtifactId(), properties);
-		Map<String, String> environmentProperties = Collections.singletonMap(AppDeployer.GROUP_PROPERTY_KEY, "devtools");
-		AppDeploymentRequest request = new AppDeploymentRequest(definition, resource, environmentProperties);
+	URLClassLoader populateClassloader() throws MalformedURLException {
+		DependencyResolutionContext resolutionContext = new DependencyResolutionContext();
 
-		String id = deployer.deploy(request);
-		AppStatus status = deployer.status(id);
-		logger.info("Status of {}: {}", id, status);
-		this.deployed.put(id, status.getState());
-		//TODO: stream stdout/stderr like docker-compose (with colors and prefix)
+		GroovyClassLoader loader = new GroovyClassLoader(Thread.currentThread().getContextClassLoader(), new CompilerConfiguration());
 
-		if (deployable.isWaitUntilStarted()) {
-			AppStatus appStatus = deployer.status(id);
+		List<RepositoryConfiguration> repositoryConfiguration = RepositoryConfigurationFactory
+				.createDefaultRepositoryConfiguration();
+		repositoryConfiguration.add(0, new RepositoryConfiguration("local",
+				new File("repository").toURI(), true));
 
-			String description = deployable.getName() != null ? deployable.getName() : resource.getArtifactId();
-			logger.info("\n\nWaiting for {} to start.\n", description);
-
-			//TODO: is there a better way to wait?
-			while (appStatus.getState() != DeploymentState.deployed) {
-			}
+		String[] classpaths = {"."};
+		for (String classpath : classpaths) {
+			loader.addClasspath(classpath);
 		}
 
-		return id;
+		System.setProperty("groovy.grape.report.downloads", "true");
+		//System.setProperty("grape.root", ".");
+
+		AetherGrapeEngine grapeEngine = AetherGrapeEngineFactory.create(loader,
+				repositoryConfiguration, resolutionContext);
+
+		//GrapeEngineInstaller.install(grapeEngine);
+
+		//TODO: get version dynamically?
+		HashMap<String, String> dependency = new HashMap<>();
+		dependency.put("group", "org.springframework.cloud.devtools");
+		dependency.put("module", "spring-cloud-devtools-command");
+		dependency.put("version", "1.1.0.BUILD-SNAPSHOT");
+		URI[] uris = grapeEngine.resolve(null, dependency);
+		//System.out.println("resolved URI's " + Arrays.asList(uris));
+		for (URI uri : uris) {
+			loader.addURL(uri.toURL());
+		}
+		log.debug("resolved URI's " + Arrays.asList(loader.getURLs()));
+		return loader;
 	}
+
 }

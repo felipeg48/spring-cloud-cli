@@ -36,6 +36,7 @@ import org.springframework.cloud.devtools.deployer.DeployerProperties.Deployable
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.StringUtils;
 
 /**
@@ -66,7 +67,7 @@ public class DeployerThread extends Thread {
 
 		final AppDeployer deployer = context.getBean(AppDeployer.class);
 
-		DelegatingResourceLoader resourceLoader = context.getBean(DelegatingResourceLoader.class);
+		ResourceLoader resourceLoader = context.getBean(DelegatingResourceLoader.class);
 
 		DeployerProperties properties = context.getBean(DeployerProperties.class);
 
@@ -112,7 +113,7 @@ public class DeployerThread extends Thread {
 		}
 	}
 
-	private String deploy(AppDeployer deployer, DelegatingResourceLoader resourceLoader, Deployable deployable, DeployerProperties properties) {
+	private String deploy(AppDeployer deployer, ResourceLoader resourceLoader, Deployable deployable, DeployerProperties properties) {
 		if (StringUtils.hasText(deployable.getName())
 				&& !properties.getDeploy().contains(deployable.getName())) {
 			// this deployable isn't in the list of things to deploy

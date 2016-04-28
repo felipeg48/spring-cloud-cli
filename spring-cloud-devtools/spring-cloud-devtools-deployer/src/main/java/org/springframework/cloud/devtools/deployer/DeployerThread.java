@@ -26,7 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.PropertyPlaceholderAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.cloud.deployer.resource.maven.MavenResource;
+import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
@@ -35,6 +35,7 @@ import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.devtools.deployer.DeployerProperties.Deployable;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.OrderComparator;
+import org.springframework.core.io.Resource;
 import org.springframework.util.StringUtils;
 
 /**
@@ -65,6 +66,8 @@ public class DeployerThread extends Thread {
 
 		final AppDeployer deployer = context.getBean(AppDeployer.class);
 
+		DelegatingResourceLoader resourceLoader = context.getBean(DelegatingResourceLoader.class);
+
 		DeployerProperties properties = context.getBean(DeployerProperties.class);
 
 		ArrayList<Deployable> deployables = new ArrayList<>(properties.getDeployables());
@@ -73,7 +76,7 @@ public class DeployerThread extends Thread {
 		logger.debug("toDeploy {}", properties.getDeployables());
 
 		for (Deployable deployable : deployables) {
-			deploy(deployer, deployable, properties);
+			deploy(deployer, resourceLoader, deployable, properties);
 		}
 
 		Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -109,7 +112,7 @@ public class DeployerThread extends Thread {
 		}
 	}
 
-	private String deploy(AppDeployer deployer, Deployable deployable, DeployerProperties properties) {
+	private String deploy(AppDeployer deployer, DelegatingResourceLoader resourceLoader, Deployable deployable, DeployerProperties properties) {
 		if (StringUtils.hasText(deployable.getName())
 				&& !properties.getDeploy().contains(deployable.getName())) {
 			// this deployable isn't in the list of things to deploy
@@ -117,11 +120,11 @@ public class DeployerThread extends Thread {
 			return null;
 		}
 
-		MavenResource resource = MavenResource.parse(deployable.getCoordinates());
+		Resource resource = resourceLoader.getResource(deployable.getCoordinates());
 
 		Map<String, String> appDefProps = new HashMap<>();
 		appDefProps.put("server.port", String.valueOf(deployable.getPort()));
-		AppDefinition definition = new AppDefinition(resource.getArtifactId(), appDefProps);
+		AppDefinition definition = new AppDefinition(deployable.getName(), appDefProps);
 
 		Map<String, String> environmentProperties = Collections.singletonMap(AppDeployer.GROUP_PROPERTY_KEY, "devtools");
 		AppDeploymentRequest request = new AppDeploymentRequest(definition, resource, environmentProperties);
@@ -133,8 +136,7 @@ public class DeployerThread extends Thread {
 
 		if (deployable.isWaitUntilStarted()) {
 			try {
-				String description = deployable.getName() != null ? deployable.getName() : resource.getArtifactId();
-				logger.info("\n\nWaiting for {} to start.\n", description);
+				logger.info("\n\nWaiting for {} to start.\n", deployable.getName());
 
 				while (appStatus.getState() != DeploymentState.deployed
 						&& appStatus.getState() != DeploymentState.failed) {

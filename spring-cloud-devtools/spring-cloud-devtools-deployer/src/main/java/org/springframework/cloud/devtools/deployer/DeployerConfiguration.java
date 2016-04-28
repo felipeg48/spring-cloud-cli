@@ -16,13 +16,19 @@
 
 package org.springframework.cloud.devtools.deployer;
 
+import java.util.HashMap;
+
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.deployer.resource.maven.MavenProperties;
+import org.springframework.cloud.deployer.resource.maven.MavenResourceLoader;
+import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.local.LocalAppDeployer;
 import org.springframework.cloud.deployer.spi.local.LocalDeployerProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ResourceLoader;
 
 /**
  * @author Spencer Gibb
@@ -45,5 +51,22 @@ public class DeployerConfiguration {
 	@ConditionalOnMissingBean
 	public AppDeployer appDeployer() {
 		return new LocalAppDeployer(localDeployerProperties());
+	}
+
+	@Bean
+	public MavenProperties mavenProperties() {
+		return new MavenProperties(); //TODO: exposed as config properties?
+	}
+
+	@Bean
+	public MavenResourceLoader mavenResourceLoader(MavenProperties mavenProperties) {
+		return new MavenResourceLoader(mavenProperties);
+	}
+
+	@Bean
+	public DelegatingResourceLoader delegatingResourceLoader(MavenResourceLoader mavenResourceLoader) {
+		HashMap<String, ResourceLoader> map = new HashMap<>();
+		map.put("maven", mavenResourceLoader);
+		return new DelegatingResourceLoader(map);
 	}
 }

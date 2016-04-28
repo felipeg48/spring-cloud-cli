@@ -19,6 +19,9 @@ package org.springframework.cloud.devtools.deployer;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.validation.constraints.NotNull;
+
+import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.Ordered;
 
@@ -28,8 +31,10 @@ import org.springframework.core.Ordered;
 @ConfigurationProperties(prefix = "devtools")
 public class DeployerProperties {
 
+	@NotNull
 	private List<Deployable> deployables = new ArrayList<>();
 
+	@NotNull
 	private List<String> deploy = new ArrayList<>();
 
 	private int statusSleepMillis = 200;
@@ -69,7 +74,9 @@ public class DeployerProperties {
 	}
 
 	public static class Deployable implements Ordered {
+		@NotEmpty
 		private String coordinates;
+		@NotEmpty
 		private String name;
 		private int port = 0;
 		private boolean waitUntilStarted;

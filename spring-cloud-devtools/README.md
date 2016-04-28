@@ -29,16 +29,16 @@ For example, to run configserver and eureka, create a `cloud.yml` that looks lik
 devtools:
   deployables:
     - name: configserver
-      coordinates: org.springframework.cloud.devtools:spring-cloud-devtools-configserver:1.1.0.BUILD-SNAPSHOT
+      coordinates: maven://org.springframework.cloud.devtools:spring-cloud-devtools-configserver:1.1.0.BUILD-SNAPSHOT
       port: 8888
       waitUntilStarted: true
       order: -10
     - name: eureka
-      coordinates: org.springframework.cloud.devtools:spring-cloud-devtools-eureka:1.1.0.BUILD-SNAPSHOT
+      coordinates: maven://org.springframework.cloud.devtools:spring-cloud-devtools-eureka:1.1.0.BUILD-SNAPSHOT
       port: 8761
 ```
 
-The `name` attribute is required. If `waitUntilStarted` is true, Devtools will block until the application has reached the `deployed` state. Before commands are deployed, the list is sorted using Spring's `OrderComparator`. In the above case, `configserver` is deployed before any other app is deployed.
+The `name` attribute is required. If `waitUntilStarted` is true, Devtools will block until the application has reached the `deployed` state. Before commands are deployed, the list is sorted using Spring's `OrderComparator`. In the above case, `configserver` is deployed before any other app is deployed. Currently only `maven://` coordinates and standard Spring Resources (`file://`, etc...) are supported. 
 
 ### Stopping
 

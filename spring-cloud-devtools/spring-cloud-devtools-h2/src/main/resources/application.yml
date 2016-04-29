@@ -1,0 +1,7 @@
+server:
+  port: 9095
+
+info:
+  artifactId: @project.artifactId@
+  description: @project.description@
+  version: @project.version@

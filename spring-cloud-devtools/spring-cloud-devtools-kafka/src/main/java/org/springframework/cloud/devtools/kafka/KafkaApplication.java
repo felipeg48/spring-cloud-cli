@@ -33,7 +33,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.SmartLifecycle;
-import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;
 
 import kafka.server.KafkaConfig;
@@ -57,12 +57,8 @@ public class KafkaApplication {
 				.run(args);
 	}
 
-	@Bean
-	public KafkaDevServer kafkaServer() {
-		return new KafkaDevServer();
-	}
-
-	class KafkaDevServer implements SmartLifecycle {
+	@Service
+	static class KafkaDevServer implements SmartLifecycle {
 		private AtomicBoolean running = new AtomicBoolean(false);
 		private ZkClient zkClient;
 
@@ -178,7 +174,7 @@ public class KafkaApplication {
 		}
 	}
 
-	class EmbeddedZookeeper {
+	static class EmbeddedZookeeper {
 		private File snapshotDir = TestUtils.tempDir();
 		private File logDir = TestUtils.tempDir();
 		private int tickTime = 500;

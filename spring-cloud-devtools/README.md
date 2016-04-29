@@ -38,7 +38,7 @@ devtools:
       port: 8761
 ```
 
-The `name` attribute is required. If `waitUntilStarted` is true, Devtools will block until the application has reached the `deployed` state. Before commands are deployed, the list is sorted using Spring's `OrderComparator`. In the above case, `configserver` is deployed before any other app is deployed. Currently only `maven://` coordinates and standard Spring Resources (`file://`, etc...) are supported. 
+The `name` attribute is required. If `waitUntilStarted` is true, Devtools will block until the application has reached the `deployed` state. Before commands are deployed, the list is sorted using Spring's `OrderComparator`. In the above case, `configserver` is deployed before any other app is deployed. Currently only `maven:` coordinates and standard Spring Resources (`file:`, etc...) are supported. 
 
 ### Stopping
 
@@ -52,8 +52,8 @@ The `name` attribute is required. If `waitUntilStarted` is true, Devtools will b
 - [X] Kafka Broker
 - [X] Kafka Bus
 - [X] Easy inclusion of default deployables
+- [X] H2 Database
 - [ ] Devtools landing page (links to various deployed artifacts & respective dashboards)
-- [ ] H2 Database
 - [ ] Dataflow server
 - [ ] Cassandra Database
 - [ ] Client Side Library

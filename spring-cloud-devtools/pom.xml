@@ -22,6 +22,7 @@
 		<module>spring-cloud-devtools-configserver</module>
 		<module>spring-cloud-devtools-deployer</module>
 		<module>spring-cloud-devtools-eureka</module>
+		<module>spring-cloud-devtools-h2</module>
 		<module>spring-cloud-devtools-hystrixdashboard</module>
 		<module>spring-cloud-devtools-kafka</module>
 	</modules>

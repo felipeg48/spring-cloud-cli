@@ -28,7 +28,7 @@ import org.springframework.core.Ordered;
 /**
  * @author Spencer Gibb
  */
-@ConfigurationProperties(prefix = "devtools")
+@ConfigurationProperties(prefix = "spring.cloud.devtools")
 public class DeployerProperties {
 
 	@NotNull

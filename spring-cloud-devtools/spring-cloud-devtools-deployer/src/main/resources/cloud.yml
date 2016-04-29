@@ -1,26 +1,28 @@
 dt:
   pre: maven://org.springframework.cloud.devtools:spring-cloud-devtools-
   ver: 1.1.0.BUILD-SNAPSHOT
-devtools:
-  deployables:
-    - name: configserver
-      coordinates: ${dt.pre}configserver:${dt.ver}
-      port: 8888
-      waitUntilStarted: true
-      order: -100
-    - name: eureka
-      coordinates: ${dt.pre}eureka:${dt.ver}
-      port: 8761
-      message: To see the dashboard open http://localhost:8761
-    - name: h2
-      coordinates: ${dt.pre}h2:${dt.ver}
-      port: 9095
-    - name: hystrixdashboard
-      coordinates: ${dt.pre}hystrixdashboard:${dt.ver}
-      port: 7979
-    - name: kafka
-      coordinates: ${dt.pre}kafka:${dt.ver}
-      port: 9091
-      waitUntilStarted: true
-      order: -200
-  deploy: ${deploy:configserver,eureka,h2, hystrixdashboard,kafka}
+spring:
+  cloud:
+    devtools:
+      deployables:
+        - name: configserver
+          coordinates: ${dt.pre}configserver:${dt.ver}
+          port: 8888
+          waitUntilStarted: true
+          order: -100
+        - name: eureka
+          coordinates: ${dt.pre}eureka:${dt.ver}
+          port: 8761
+          message: To see the dashboard open http://localhost:8761
+        - name: h2
+          coordinates: ${dt.pre}h2:${dt.ver}
+          port: 9095
+        - name: hystrixdashboard
+          coordinates: ${dt.pre}hystrixdashboard:${dt.ver}
+          port: 7979
+        - name: kafka
+          coordinates: ${dt.pre}kafka:${dt.ver}
+          port: 9091
+          waitUntilStarted: true
+          order: -200
+      deploy: ${deploy:configserver,eureka,h2, hystrixdashboard,kafka}

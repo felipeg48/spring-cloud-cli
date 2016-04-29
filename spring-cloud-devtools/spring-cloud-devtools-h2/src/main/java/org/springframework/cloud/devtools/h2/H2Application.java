@@ -21,7 +21,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.h2.tools.Console;
-import org.h2.tools.Server;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.SmartLifecycle;
@@ -39,11 +38,11 @@ public class H2Application {
 		SpringApplication.run(H2Application.class, args);
 	}
 
+	@SuppressWarnings("unused")
 	@Service
 	static class H2Server implements SmartLifecycle {
 		private AtomicBoolean running = new AtomicBoolean(false);
 
-		private Server server;
 		private Console console;
 
 		@Override
@@ -64,7 +63,6 @@ public class H2Application {
 					log.info("Starting H2 Server");
 					this.console = new Console();
 					this.console.runTool("-tcp", "-pg", "-web",  "-tcpAllowOthers");
-					//this.server = Server.createTcpServer("-tcpAllowOthers");
 				} catch (Exception e) {
 					ReflectionUtils.rethrowRuntimeException(e);
 				}
@@ -75,7 +73,6 @@ public class H2Application {
 		public void stop() {
 			if (this.running.compareAndSet(true, false)) {
 				log.info("Stoping H2 Server");
-				//this.server.stop();
 				this.console.shutdown();
 			}
 		}

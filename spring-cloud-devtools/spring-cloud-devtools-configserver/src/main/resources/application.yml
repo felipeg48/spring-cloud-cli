@@ -6,6 +6,7 @@ spring:
   cloud:
     config:
       server:
+        bootstrap: true
         native:
           search-locations: classpath:/devtools, file:./devtools
 

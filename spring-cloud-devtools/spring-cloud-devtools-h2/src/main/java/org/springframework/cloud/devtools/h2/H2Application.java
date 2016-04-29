@@ -23,14 +23,18 @@ import org.apache.commons.logging.LogFactory;
 import org.h2.tools.Console;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.SmartLifecycle;
+import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;
 
 /**
  * @author Spencer Gibb
  */
+@EnableDiscoveryClient
 @SpringBootApplication
+@Controller
 public class H2Application {
 	private static final Log log = LogFactory.getLog(H2Application.class);
 

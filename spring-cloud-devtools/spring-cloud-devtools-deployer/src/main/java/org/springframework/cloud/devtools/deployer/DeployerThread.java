@@ -130,6 +130,12 @@ public class DeployerThread extends Thread {
 
 		Map<String, String> appDefProps = new HashMap<>();
 		appDefProps.put("server.port", String.valueOf(deployable.getPort()));
+
+		//TODO: move to notDeployedProps or something
+		if (!shouldDeploy("kafka", properties)) {
+			appDefProps.put("spring.cloud.bus.enabled", Boolean.FALSE.toString());
+		}
+
 		AppDefinition definition = new AppDefinition(deployable.getName(), appDefProps);
 
 		Map<String, String> environmentProperties = Collections.singletonMap(AppDeployer.GROUP_PROPERTY_KEY, "devtools");
@@ -159,8 +165,12 @@ public class DeployerThread extends Thread {
 	}
 
 	private boolean shouldDeploy(Deployable deployable, DeployerProperties properties) {
-		boolean deploy = properties.getDeploy().contains(deployable.getName());
-		logger.debug("shouldDeploy {} = {}", deployable.getName(), deploy);
+		return shouldDeploy(deployable.getName(), properties);
+	}
+
+	private boolean shouldDeploy(String name, DeployerProperties properties) {
+		boolean deploy = properties.getDeploy().contains(name);
+		logger.debug("shouldDeploy {} = {}", name, deploy);
 		return deploy;
 	}
 

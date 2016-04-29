@@ -37,7 +37,7 @@ public class DeployerProperties {
 	@NotNull
 	private List<String> deploy = new ArrayList<>();
 
-	private int statusSleepMillis = 200;
+	private int statusSleepMillis = 300;
 
 	public List<Deployable> getDeployables() {
 		return deployables;

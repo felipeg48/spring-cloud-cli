@@ -18,3 +18,11 @@ ribbon:
 spring:
   datasource:
     url: jdbc:h2:tcp://localhost/~/devtools
+
+logging:
+  level:
+    kafka: WARN
+    org.apache.zookeeper: WARN
+    org.apache.zookeeper.ClientCnxn: ERROR
+    org.apache.kafka: WARN
+    org.I0Itec: WARN

@@ -10,6 +10,9 @@ spring:
           port: 8888
           waitUntilStarted: true
           order: -100
+        - name: dataflow
+          coordinates: ${dt.pre}dataflow:${dt.ver}
+          port: 9393
         - name: eureka
           coordinates: ${dt.pre}eureka:${dt.ver}
           port: 8761
@@ -17,6 +20,8 @@ spring:
         - name: h2
           coordinates: ${dt.pre}h2:${dt.ver}
           port: 9095
+          waitUntilStarted: true
+          order: -50
         - name: hystrixdashboard
           coordinates: ${dt.pre}hystrixdashboard:${dt.ver}
           port: 7979

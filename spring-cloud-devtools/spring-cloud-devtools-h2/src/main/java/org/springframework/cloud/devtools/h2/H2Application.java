@@ -21,13 +21,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.h2.tools.Console;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * @author Spencer Gibb
@@ -49,6 +52,9 @@ public class H2Application {
 
 		private Console console;
 
+		@Value("${spring.datasource.url:9096}")
+		private String dataSourceUrl;
+
 		@Override
 		public boolean isAutoStartup() {
 			return true;
@@ -66,11 +72,17 @@ public class H2Application {
 				try {
 					log.info("Starting H2 Server");
 					this.console = new Console();
-					this.console.runTool("-tcp", "-pg", "-web",  "-tcpAllowOthers");
+					this.console.runTool("-tcp", "-pg", "-web",  "-tcpAllowOthers", "-tcpPort", getH2Port(dataSourceUrl));
 				} catch (Exception e) {
 					ReflectionUtils.rethrowRuntimeException(e);
 				}
 			}
+		}
+
+		private String getH2Port(String url) {
+			String[] tokens = StringUtils.tokenizeToStringArray(url, ":");
+			Assert.isTrue(tokens.length >= 5, "URL not properly formatted");
+			return tokens[4].substring(0, tokens[4].indexOf("/"));
 		}
 
 		@Override

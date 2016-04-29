@@ -17,7 +17,7 @@ ribbon:
 
 spring:
   datasource:
-    url: jdbc:h2:tcp://localhost/~/devtools
+    url: jdbc:h2:tcp://localhost:9096/~/devtools
 
 logging:
   level:

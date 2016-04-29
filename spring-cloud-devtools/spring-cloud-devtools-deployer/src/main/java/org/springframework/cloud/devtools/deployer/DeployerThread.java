@@ -92,6 +92,12 @@ public class DeployerThread extends Thread {
 			}
 		});
 
+		for (Deployable deployable : deployables) {
+			if (shouldDeploy(deployable, properties) && StringUtils.hasText(deployable.getMessage())) {
+				logger.info("\n\n{}: {}\n", deployable.getName(),  deployable.getMessage());
+			}
+		}
+
 		logger.info("\n\nType Ctrl-C to quit.\n");
 
 		while (true) {
@@ -114,8 +120,7 @@ public class DeployerThread extends Thread {
 	}
 
 	private String deploy(AppDeployer deployer, ResourceLoader resourceLoader, Deployable deployable, DeployerProperties properties) {
-		if (StringUtils.hasText(deployable.getName())
-				&& !properties.getDeploy().contains(deployable.getName())) {
+		if (!shouldDeploy(deployable, properties)) {
 			// this deployable isn't in the list of things to deploy
 			logger.info("Skipping deploy of {}", deployable.getName());
 			return null;
@@ -143,6 +148,7 @@ public class DeployerThread extends Thread {
 						&& appStatus.getState() != DeploymentState.failed) {
 					Thread.sleep(properties.getStatusSleepMillis());
 					appStatus = getAppStatus(deployer, id);
+					logger.debug("State of {} = {}", id, appStatus.getState());
 				}
 			} catch (Exception e) {
 				logger.error("error updating status of " + id, e);
@@ -150,6 +156,12 @@ public class DeployerThread extends Thread {
 		}
 
 		return id;
+	}
+
+	private boolean shouldDeploy(Deployable deployable, DeployerProperties properties) {
+		boolean deploy = properties.getDeploy().contains(deployable.getName());
+		logger.debug("shouldDeploy {} = {}", deployable.getName(), deploy);
+		return deploy;
 	}
 
 	private AppStatus getAppStatus(AppDeployer deployer, String id) {

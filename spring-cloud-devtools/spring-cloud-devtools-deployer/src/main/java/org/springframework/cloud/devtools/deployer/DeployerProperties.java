@@ -81,6 +81,7 @@ public class DeployerProperties {
 		private int port = 0;
 		private boolean waitUntilStarted;
 		private int order = 0;
+		private String message;
 
 		public String getCoordinates() {
 			return coordinates;
@@ -123,6 +124,14 @@ public class DeployerProperties {
 			this.order = order;
 		}
 
+		public String getMessage() {
+			return message;
+		}
+
+		public void setMessage(String message) {
+			this.message = message;
+		}
+
 		@Override
 		public String toString() {
 			final StringBuffer sb = new StringBuffer("Deployable{");
@@ -131,6 +140,7 @@ public class DeployerProperties {
 			sb.append(", port=").append(port);
 			sb.append(", waitUntilStarted=").append(waitUntilStarted);
 			sb.append(", order=").append(order);
+			sb.append(", message=").append(message);
 			sb.append('}');
 			return sb.toString();
 		}

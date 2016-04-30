@@ -60,6 +60,7 @@ spring cloud --deploy=configserver,h2,kafka,dataflow
 - [X] H2 Database
 - [X] Spring Cloud Dataflow server
 - [X] Devtools landing page (Eureka Dashboard works for now)
+- [ ] Speedup startup (parallel start?, retry for config server, db and kafka?)
 - [ ] Cassandra Database
 - [ ] Client Side Library
 - [ ] Spring Boot Admin (Not compatible with Brixton)

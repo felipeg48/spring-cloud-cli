@@ -58,8 +58,8 @@ spring cloud --deploy=configserver,h2,kafka,dataflow
 - [X] Kafka Bus
 - [X] Easy inclusion of default deployables
 - [X] H2 Database
-- [ ] Devtools landing page (links to various deployed artifacts & respective dashboards)
-- [ ] Dataflow server
+- [X] Spring Cloud Dataflow server
+- [X] Devtools landing page (Eureka Dashboard works for now)
 - [ ] Cassandra Database
 - [ ] Client Side Library
 - [ ] Spring Boot Admin (Not compatible with Brixton)

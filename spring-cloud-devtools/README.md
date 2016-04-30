@@ -18,7 +18,7 @@ $ spring install org.springframework.cloud:spring-cloud-cli:1.1.0.BUILD-SNAPSHOT
 $ spring cloud
 ```
 
-Currently starts configserver on port 8888 and then eureka on port 8761.
+Currently starts configserver, eureka, h2 (db server), hystrixdashboard and kafka. [Here](https://github.com/spring-cloud/spring-cloud-cli/blob/devtools/spring-cloud-devtools/spring-cloud-devtools-deployer/src/main/resources/cloud.yml) is the full configuration.
 
 ### Configuring
 
@@ -39,6 +39,11 @@ devtools:
 ```
 
 The `name` attribute is required. If `waitUntilStarted` is true, Devtools will block until the application has reached the `deployed` state. Before commands are deployed, the list is sorted using Spring's `OrderComparator`. In the above case, `configserver` is deployed before any other app is deployed. Currently only `maven:` coordinates and standard Spring Resources (`file:`, etc...) are supported. 
+
+You can also use the `--deploy` option to select from the [predefined deployables](https://github.com/spring-cloud/spring-cloud-cli/blob/devtools/spring-cloud-devtools/spring-cloud-devtools-deployer/src/main/resources/cloud.yml). For example to run Spring Cloud Data Flow execute:
+```
+spring cloud --deploy=configserver,h2,kafka,dataflow
+```
 
 ### Stopping
 

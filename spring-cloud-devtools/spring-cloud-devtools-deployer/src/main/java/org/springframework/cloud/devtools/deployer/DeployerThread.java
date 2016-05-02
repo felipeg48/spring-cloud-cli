@@ -126,6 +126,7 @@ public class DeployerThread extends Thread {
 			return null;
 		}
 
+		logger.debug("getting resource {} = {}", deployable.getName(), deployable.getCoordinates());
 		Resource resource = resourceLoader.getResource(deployable.getCoordinates());
 
 		Map<String, String> appDefProps = new HashMap<>();
@@ -141,6 +142,7 @@ public class DeployerThread extends Thread {
 		Map<String, String> environmentProperties = Collections.singletonMap(AppDeployer.GROUP_PROPERTY_KEY, "devtools");
 		AppDeploymentRequest request = new AppDeploymentRequest(definition, resource, environmentProperties);
 
+		logger.debug("deploying resource {} = {}", deployable.getName(), deployable.getCoordinates());
 		String id = deployer.deploy(request);
 		AppStatus appStatus = getAppStatus(deployer, id);
 		logger.info("Status of {}: {}", id, appStatus);

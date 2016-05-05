@@ -39,7 +39,7 @@ import org.springframework.boot.cli.command.archive.JarCommand;
 import org.springframework.boot.cli.command.grab.GrabCommand;
 import org.springframework.boot.cli.command.run.RunCommand;
 import org.springframework.boot.cli.command.test.TestCommand;
-import org.springframework.cloud.devtools.cli.DevtoolsCommand;
+import org.springframework.cloud.launcher.cli.LauncherCommand;
 import org.springframework.util.SocketUtils;
 
 /**
@@ -75,8 +75,8 @@ public class CliTester implements TestRule {
 		return getOutput();
 	}
 
-	public String devtools(String... args) throws Exception {
-		Future<DevtoolsCommand> future = submitCommand(new DevtoolsCommand(), args);
+	public String launcher(String... args) throws Exception {
+		Future<LauncherCommand> future = submitCommand(new LauncherCommand(), args);
 		this.commands.add(future.get(this.timeout, TimeUnit.MILLISECONDS));
 		return getOutput();
 	}

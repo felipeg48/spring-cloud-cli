@@ -22,7 +22,7 @@ import org.springframework.boot.cli.command.Command;
 import org.springframework.boot.cli.command.CommandFactory;
 import org.springframework.cloud.cli.command.encrypt.DecryptCommand;
 import org.springframework.cloud.cli.command.encrypt.EncryptCommand;
-import org.springframework.cloud.devtools.cli.DevtoolsCommand;
+import org.springframework.cloud.launcher.cli.LauncherCommand;
 
 /**
  * @author Dave Syer
@@ -32,7 +32,7 @@ public class CloudCommandFactory implements CommandFactory {
 
 	@Override
 	public Collection<Command> getCommands() {
-		return Arrays.<Command>asList(new EncryptCommand(), new DecryptCommand(), new DevtoolsCommand());
+		return Arrays.<Command>asList(new EncryptCommand(), new DecryptCommand(), new LauncherCommand());
 	}
 
 }

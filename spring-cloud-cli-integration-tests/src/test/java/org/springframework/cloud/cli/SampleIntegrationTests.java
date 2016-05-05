@@ -79,8 +79,8 @@ public class SampleIntegrationTests {
 
 	@Test
 	@Ignore
-	public void devtools() throws Exception {
-		this.cli.devtools();
+	public void launcher() throws Exception {
+		this.cli.launcher();
 	}
 
 }

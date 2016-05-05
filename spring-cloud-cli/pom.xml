@@ -19,6 +19,11 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-core</artifactId>
+			<version>4.2.5.RELEASE</version>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework.cloud.devtools</groupId>
 			<artifactId>spring-cloud-devtools-cli</artifactId>
 			<version>${project.version}</version>
